@@ -157,7 +157,7 @@ def build_or_load_gen(args):
         model = Seq2Seq(encoder=encoder,decoder=encoder,config=config,
                     beam_size=args.beam_size,max_length=args.max_target_length,
                     sos_id=tokenizer.convert_tokens_to_ids(["<mask0>"])[0],eos_id=tokenizer.sep_token_id,
-                    queue_size=args.queue_size, device= args.device, ensemble=args.ensemble)
+                    queue_size=args.queue_size, device= args.device)
 
     return config, tokenizer, model
 

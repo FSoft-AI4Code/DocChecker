@@ -124,7 +124,7 @@ def main():
             args.output_dir += 'just_in_time/'
         args.num_train_epochs = 30
     elif args.task == 'pretrain':
-        args.language = [ 'go', 'java', 'javascript', 'php', 'python', 'ruby']
+        args.language = [ 'python']
         args.output_dir += 'pretrained_CSN/'
 
     if args.wandb:
@@ -453,7 +453,7 @@ def main():
             eval_examples, eval_dataloader = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool,stage='test', label=True, sequential=True)
         else:
             checkpoint_prefix = 'checkpoint-best-bleu/pytorch_model.bin'
-            eval_examples, eval_dataloader = get_dataloader(args, args.data_folder, pool=pool,tokenizer=tokenizer, stage='train', label=False, sequential=True, num_sample=1000)
+            eval_examples, eval_dataloader, raw_examples = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool,stage='train', label=False, sequential=True, infer=True)
 
         output_dir = os.path.join(args.output_dir, checkpoint_prefix)  
         model_to_load = model.module if hasattr(model, 'module') else model  
@@ -523,6 +523,7 @@ def main():
                         predictions.append(str(gold.idx)+'\t'+str(label)+'\t'+ref)
                         f.write(str(gold.idx)+'\t'+str(label)+'\t'+ref+'\n')
                         f1.write(str(gold.idx)+'\t'+str(label)+'\t'+gold.target+'\n')   
+ 
 
 if __name__ == "__main__":
     main()

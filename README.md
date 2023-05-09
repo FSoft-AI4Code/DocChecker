@@ -34,49 +34,40 @@ This is a tool that uses for automated detection to identify inconsistencies bet
 CodeSync can be easily to install and use as a Python package:
 
 ```bash
-pip install CodeSync
+pip install CodeSyncNet
 ```
 
 ## Inference
 
 ```python
-from CodeSyncNet import CodeSyncNet
+from CodeSync import CodeSyncNet
 
 model = CodeSyncNet()
 
 code = """
-    double sum2num(int a, int b) {
-        return a + b;
-    }
+def e(message, exit_code=None):
+       print_log(message, YELLOW, BOLD)
+    if exit_code is not None:
+        sys.exit(exit_code)
 """
 
-docstring = """
-    /**
-    * Sum of 2 number
-    * @param a int number
-    * @param b int number
-    */
+docstring = "Print an error log message."
 
-"""
 model.inference(code, docstring)
 >>> MATCH!
 
 code = """
-    def func(self):
-        self.caller.db.full_name = ""
-        self.caller.msg("Full Name Cleared.")   
-        self.menutree.goto("fullname")
+def inject_func_as_unbound_method(class_, func, method_name=None):
+       if method_name is None:
+        method_name = get_funcname(func)
+    setattr(class_, method_name, func)
 """
-
-docstring = """
-    Execute the command
-"""
+docstring = "This is actually quite simple"
 
 model.inference(code, docstring)
 >>> UNMATCH!
->>> Recommended docstring: Clear the full_name.
+>>> Recommended docstring:  Inject a function as an unbound method.
 ```
-
 
 ## Pre-training 
 ### Installation
@@ -130,7 +121,7 @@ To demonstrate the performance of our approach, we fine-tune CodeSync on the Jus
 
 ### Dataset
 
-Download data for the [Just-In-Time](https://github.com/panthap2/deep-jit-inconsistency-detection) task from [here](https://drive.google.com/drive/folders/1heqEQGZHgO6gZzCjuQD1EyYertN4SAYZ?usp=sharing)
+Download data for the [Just-In-Time](https://github.com/panthap2/deep-jit-inconsistency-detection) task from [here].(https://drive.google.com/drive/folders/1heqEQGZHgO6gZzCjuQD1EyYertN4SAYZ?usp=sharing)
 
 We also provide fine-tune settings for CodeSync, whose results are reported in the paper.
 

@@ -21,11 +21,10 @@ class Seq2Seq(nn.Module):
         * `eos_id`- end of symbol ids in target for beam search. 
     """
     def __init__(self, encoder,decoder, config, beam_size=4, max_length=32, sos_id=None, eos_id=None, queue_size=57600,
-                    momentum = 0.995, embed_dim=256, device='cpu',ensemble=None):
+                    momentum = 0.995, embed_dim=256, device='cpu'):
         super(Seq2Seq, self).__init__()
 
         self.device=device
-        self.ensemble = ensemble
 
         self.encoder = encoder
         self.decoder = decoder
