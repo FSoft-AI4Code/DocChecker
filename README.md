@@ -4,12 +4,12 @@
   <img src="./assets/logo.jpg" width="300px" alt="logo">
 </p>
 
-# CodeSync: Bootstrapping Code-Text Pretrained Language Model to Detect Inconsistency Between Code and Comment
+# CodeSync: Bootstrapping Code-Text Pretrained Language Model to Detect Inconsistency Between \\ Code and Comment
 __________________________
 
 </div>
 
-## Table of content
+<!-- ## Table of content
 - [CodeSync package](#codesync-package)
 	- [Getting Started] (#getting-started)
 	- [Inference] (#inference)
@@ -20,15 +20,20 @@ __________________________
 		- [Dataset] (#dataset-JustInTime)
 - [Citing CodeSync](#citing-codesync)
 - [Contact Us](#contact-us)
-- [License](#license)
+- [License](#license) -->
 
 ___________
 # CodeSync Package
-A tool uses for automated detection to identify inconsistencies between code and docstrings, and generates comprehensive replacements for inconsistent docstrings.
+This is a tool that uses for automated detection to identify inconsistencies between code and docstrings, and generates comprehensive replacements for inconsistent docstrings.
+
+<p align="center">
+  <img src="./assets/overview.png" width="300px" alt="overview">
+</p>
 
 ## Getting Started
 
-CodeSync can be installed via `pip`:
+CodeSync can be easily to install and use as a Python package:
+
 ```bash
 pip install codeSyncNet
 ```
@@ -37,6 +42,8 @@ pip install codeSyncNet
 
 ```python
 from codeSyncNet import CodeSyncNet
+
+model = CodeSyncNet()
 
 code = """
     double sum2num(int a, int b) {
@@ -109,19 +116,29 @@ rm -r */final
 cd ..
 ```
 
+To reproduce the pretrained model, follow below command line:
+```shell
+python -m torch.distributed.run --nproc_per_node=2 run.py \
+	--do_train \
+	--do_eval \
+	--task pretrain \
+	--data_folder dataset/pretrain_dataset \ 
+	--num_train_epochs 10 
+```
+
 ## Fine-tuning 
+To demonstrate the performance of our approach, we fine-tune CodeSync on the Just-In-Time task. The purpose of this task is to determine whether the comment is semantically out of sync with the corresponding code function.
 
 ### Dataset
 
 Download data for the [Just-In-Time](https://github.com/panthap2/deep-jit-inconsistency-detection) task from [here](https://drive.google.com/drive/folders/1heqEQGZHgO6gZzCjuQD1EyYertN4SAYZ?usp=sharing)
 
-Here we provide fine-tune settings for CodeSync, whose results are reported in the paper.
+We also provide fine-tune settings for CodeSync, whose results are reported in the paper.
 
 ```shell
-lang=python
 
 # Training
-python run.py \
+python -m torch.distributed.run --nproc_per_node=2 run.py \
 	--do_train \
 	--do_eval \
 	--post_hoc \
@@ -131,7 +148,7 @@ python run.py \
 	--num_train_epochs 30 
 
 # Testing
-python run.py \
+python -m torch.distributed.run --nproc_per_node=2 run.py \
 	--do_test \
 	--post_hoc \
 	--task just_in_time \
