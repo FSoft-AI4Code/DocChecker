@@ -27,7 +27,7 @@ ___________
 This is a tool that uses for automated detection to identify inconsistencies between code and docstrings, and generates comprehensive replacements for inconsistent docstrings.
 
 <p align="center">
-  <img src="./assets/overview.png" width="300px" alt="overview">
+  <img src="./assets/overview.png" width="800px" alt="overview">
 </p>
 
 ## Getting Started
