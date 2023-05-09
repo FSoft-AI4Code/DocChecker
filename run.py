@@ -34,7 +34,6 @@ from dataloader import *
 import multiprocessing
 
 from transformers import (AdamW, get_linear_schedule_with_warmup)
-from statistics import mean
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +70,7 @@ def main():
     parser.add_argument("--wandb", action='store_true',
                         help="whether to visualize training phase by wandb")
     parser.add_argument("--post_hoc", action='store_true',
-                        help="whether to run the setting of post hoc")
+                        help="whether to run the setting of post hoc (for Just_in_time task)")
     parser.add_argument("--do_train", action='store_true',
                         help="Whether to run training.")
     parser.add_argument("--do_eval", action='store_true',
