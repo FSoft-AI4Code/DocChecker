@@ -4,8 +4,7 @@
   <img src="./assets/logo.jpg" width="300px" alt="logo">
 </p>
 
-# CodeSync: Bootstrapping Code-Text Pretrained Language Model to Detect Inconsistency Between \\ Code and Comment
-__________________________
+# CodeSync: Bootstrapping Code-Text Pretrained Language Model to Detect Inconsistency Between Code and Comment
 
 </div>
 
@@ -35,13 +34,13 @@ This is a tool that uses for automated detection to identify inconsistencies bet
 CodeSync can be easily to install and use as a Python package:
 
 ```bash
-pip install codeSyncNet
+pip install CodeSync
 ```
 
 ## Inference
 
 ```python
-from codeSyncNet import CodeSyncNet
+from CodeSyncNet import CodeSyncNet
 
 model = CodeSyncNet()
 
@@ -116,7 +115,7 @@ rm -r */final
 cd ..
 ```
 
-To reproduce the pretrained model, follow below command line:
+To reproduce the pre-trained model, follow below command line:
 ```shell
 python -m torch.distributed.run --nproc_per_node=2 run.py \
 	--do_train \
