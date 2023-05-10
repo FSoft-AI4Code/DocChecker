@@ -31,7 +31,7 @@ This is a tool that uses for automated detection to identify inconsistencies bet
 
 ## Getting Started
 
-CodeSync can be easily to install and use as a Python package:
+CodeSync can be easy to install and use as a Python package:
 
 ```bash
 pip install CodeSyncNet
