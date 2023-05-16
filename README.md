@@ -23,56 +23,70 @@
 
 ___________
 # CodeSync Package
-This is a tool that uses for automated detection to identify inconsistencies between code and docstrings, and generates comprehensive replacements for inconsistent docstrings.
+CodeSync is trained on top of encoder-decoder model to learn from code-text pairs. It is a tool that uses for automated detection to identify inconsistencies between code and docstrings, and generates comprehensive summary sentence to replace the old ones.
 
 <p align="center">
   <img src="./assets/overview.png" width="800px" alt="overview">
 </p>
 
-## Getting Started
+## Usage Scenario
 
-CodeSync can be easy to install and use as a Python package:
+### Installation
+Install the dependencies:
 
 ```bash
-pip install CodeSyncNet
+pip -r install requirements.txt
 ```
 
-## Inference
+### Inference
+
+Since CodeSync is a Python package, users can use it by `inference` function. 
 
 ```python
-from CodeSync import CodeSyncNet
+from CodeSync.utils import inference
+```
+Parameters:
++ _input_file_path(str): the file path that contains source code if users want to check all the functions in there.
++ _raw_code(str): a sequence of source code if `input_file_path` is not given.
++ _language(str, required): the programming language. We support 10 popular programming languages such as Java, JavaScript, Python, Ruby, Rust, Golang, C#, C++, C, and PHP.
++ _output_file_path(str): if `input_file_path` is given, the results from our tool will be written in this path; otherwise, they will be printed on the screen.
 
-model = CodeSyncNet()
+
+#### Example
+```python
+from CodeSync.utils import inference
 
 code = """
+def inject_func_as_unbound_method(class_, func, method_name=None):
+	# This is actually quite simple
+    if method_name is None:
+        method_name = get_funcname(func)
+    setattr(class_, method_name, func)
+
 def e(message, exit_code=None):
-       print_log(message, YELLOW, BOLD)
+	# Print an error log message.
+    print_log(message, YELLOW, BOLD)
     if exit_code is not None:
         sys.exit(exit_code)
 """
 
-docstring = "Print an error log message."
+inference(raw_code=code, language='python')
 
-model.inference(code, docstring)
->>> MATCH!
-
-code = """
-def inject_func_as_unbound_method(class_, func, method_name=None):
-       if method_name is None:
-        method_name = get_funcname(func)
-    setattr(class_, method_name, func)
-"""
-docstring = "This is actually quite simple"
-
-model.inference(code, docstring)
->>> UNMATCH!
->>> Recommended docstring:  Inject a function as an unbound method.
+>>> Your code snippet function: inject_func_as_unbound_method
+    Results: 
+            UNMATCH!
+            Recommended docstring:  Inject a function as an unbound method.
+	-------------
+	Your code snippet function: e
+    Results: 
+            MATCH!
 ```
 
 ## Pre-training 
 ### Installation
 Setup environment and install dependencies
 ```bash
+cd ./CodeSync
 pip -r install requirements.txt
 ```
 
