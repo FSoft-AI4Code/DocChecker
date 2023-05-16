@@ -46,10 +46,10 @@ Since CodeSync is a Python package, users can use it by `inference` function.
 from CodeSync.utils import inference
 ```
 Parameters:
-+ _input_file_path(str): the file path that contains source code if users want to check all the functions in there.
-+ _raw_code(str): a sequence of source code if `input_file_path` is not given.
-+ _language(str, required): the programming language. We support 10 popular programming languages such as Java, JavaScript, Python, Ruby, Rust, Golang, C#, C++, C, and PHP.
-+ _output_file_path(str): if `input_file_path` is given, the results from our tool will be written in this path; otherwise, they will be printed on the screen.
++ input_file_path (str): the file path that contains source code if users want to check all the functions in there.
++ raw_code (str): a sequence of source code if `input_file_path` is not given.
++ language (str, required): the programming language. We support 10 popular programming languages such as Java, JavaScript, Python, Ruby, Rust, Golang, C#, C++, C, and PHP.
++ output_file_path (str): if `input_file_path` is given, the results from our tool will be written in `output_file_path`; otherwise, they will be printed on the screen.
 
 
 #### Example
@@ -58,13 +58,13 @@ from CodeSync.utils import inference
 
 code = """
 def inject_func_as_unbound_method(class_, func, method_name=None):
-	# This is actually quite simple
+    # This is actually quite simple
     if method_name is None:
         method_name = get_funcname(func)
     setattr(class_, method_name, func)
 
 def e(message, exit_code=None):
-	# Print an error log message.
+    # Print an error log message.
     print_log(message, YELLOW, BOLD)
     if exit_code is not None:
         sys.exit(exit_code)
@@ -76,8 +76,8 @@ inference(raw_code=code, language='python')
     Results: 
             UNMATCH!
             Recommended docstring:  Inject a function as an unbound method.
-	-------------
-	Your code snippet function: e
+    -------------
+    Your code snippet function: e
     Results: 
             MATCH!
 ```
