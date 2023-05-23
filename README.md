@@ -88,15 +88,15 @@ inference(raw_code=code,language='python')
     "docstring": " This is actually quite simple",
     "predict": "Inconsistent!",
     "recommended_docstring": "Inject a function as an unbound method."
-	},
-	{
-	    "function_name": "e",
-	    "code": "def e(message, exit_code=None):\n    \n    print_log(message, YELLOW, BOLD)\n    if exit_code is not None:\n        sys.exit(exit_code)",
-	    "docstring": "Print an error log message.",
-	    "predict": "Consistent!",
-	    "recommended_docstring": "Print an error log message."
-	}
-	]
+    },
+    {
+        "function_name": "e",
+        "code": "def e(message, exit_code=None):\n    \n    print_log(message, YELLOW, BOLD)\n    if exit_code is not None:\n        sys.exit(exit_code)",
+        "docstring": "Print an error log message.",
+        "predict": "Consistent!",
+        "recommended_docstring": "Print an error log message."
+    }
+]
 ```
 
 ## Pre-training 
