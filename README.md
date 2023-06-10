@@ -78,19 +78,19 @@ There are a few notable arguments that need to be considered:
 
 Parameters:
 
-- input_file_path (str): the file path that contains source code, if you want to check all the functions in there.
-- raw_code (str): a sequence of source code if `input_file_path` is not given.
-- language (str, required): the programming language that corresponds your raw_code. We support 10 popular programming languages, including Java, JavaScript, Python, Ruby, Rust, Golang, C#, C++, C, and PHP.
-- output_file_path (str): if `output_file_path` is given, the results from our tool will be written in `output_file_path`; otherwise, they will be printed on the screen.
+- ``input_file_path`` (str): the file path that contains source code, if you want to check all the functions in there.
+- ``raw_code`` (str): a sequence of source code if `input_file_path` is not given.
+- ``language`` (str, required): the programming language that corresponds your raw_code. We support 10 popular programming languages, including Java, JavaScript, Python, Ruby, Rust, Golang, C#, C++, C, and PHP.
+- ``output_file_path`` (str): if `output_file_path` is given, the results from our tool will be written in `output_file_path`; otherwise, they will be printed on the screen.
 
 Returns:
 
 - list of dictionaries, including:
-    - function_name: the name of each function in the raw code
-    - code: code snippet
-    - docstring: the docstring corresponding code snippet
-    - predict: the prediction of DocChecker. It returns “Inconsistent!” for the inconsistent pair and “Consistent!” means the docstring is consistent with the code in a code-text pair
-    - recommend_docstring: If a code-text pair is considered as “Inconsistent!”, DocChecker will replace its docstring by giving comprehensive ones; otherwise, it will keep the original version.
+    - ``function_name``: the name of each function in the raw code
+    - ``code``: code snippet
+    - ``docstring``: the docstring corresponding code snippet
+    - ``predict``: the prediction of DocChecker. It returns “Inconsistent!” or “Consistent!”, corresponding the docstring is inconsistent/consistent with the code in a code-text pair
+    - ``recommend_docstring``: If a code-text pair is considered as “Inconsistent!”, DocChecker will replace its docstring by giving comprehensive ones; otherwise, it will keep the original version.
 
 Here's an example showing how to load docchecker model and perform inference on inconsistent detection task:
 
