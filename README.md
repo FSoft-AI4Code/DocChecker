@@ -3,54 +3,85 @@
 <p align="center">
   <img src="./assets/logo.jpg" width="300px" alt="logo">
 </p>
-
+	
+  <a href="https://opensource.org/license/apache-2-0/">
+  <img alt="license" src="https://img.shields.io/badge/License-Apache%202.0-green.svg"/>
+  </a>
+   <a href="https://www.python.org/downloads/release/python-380/">
+  <img alt="python" src="https://img.shields.io/badge/python-3.8+-yellow.svg"/>
+  </a> 
+   <a href="https://pypi.org/project/docchecker/">
+  <img alt="downloads" src="https://static.pepy.tech/badge/salesforce-codetf"/>
+  </a> 
+	
 # DocChecker: Bootstrapping Code-Text Pretrained Language Model to Detect Inconsistency Between Code and Comment
 
 </div>
 
-<!-- ## Table of content
-- [DocChecker package](#DocChecker-package)
-	- [Getting Started] (#getting-started)
-	- [Inference] (#inference)
-	- [Pre-training] (#pretrain)
-		- [Installation] (#install)
-	 	- [Dataset] (#dataset-CSN)
-	- [Fine-tuning] (#finetuning)
-		- [Dataset] (#dataset-JustInTime)
-- [Citing DocChecker](#citing-DocChecker)
+# Table of content
+- [Introduction](#introduction)
+- [Installation](#installation-guide)
+- [Getting Started](#getting-started)
+	- [Inferencing Pipeline](#inferencing-pipeline)
+	- [Pre-training Pipeline](#pre-training-pipeline)
+		- [Installation for Pre-training](#installation-for-pre-training)
+	 	- [Dataset for Pre-training](#dataset-for-pre-training)
+	- [Fine-tuning Pipeline](#fine-tuning-pipeline)
+		- [Dataset for Fine-tuning](#dataset-for-fine-tuning)
+- [Playground](#playground)
+- [Citing Us](#citing-us)
 - [Contact Us](#contact-us)
-- [License](#license) -->
+- [License](#license) 
 
 ___________
-# The DocChecker Tool
-DocChecker is trained on top of encoder-decoder model to learn from code-text pairs. It is a tool that uses for automated detection to identify inconsistencies between code and docstrings, and generates comprehensive summary sentence to replace the old ones.
+# Introduction
+Comments on source code serve as critical documentation for enabling developers to understand the code's functionality and use it properly. However, it is challenging to ensure that comments accurately reflect the corresponding code, particularly as the software evolves over time. Although increasing interest has been taken in developing automated methods for identifying and fixing inconsistencies between code and comments, the existing methods have primarily relied on heuristic rules. 
+
+DocChecker is trained on top of encoder-decoder model to learn from code-text pairs. It is jointly pre-trained with three objectives: code-text contrastive learning, binary classification, and text generation. DocChecker is a tool that be used to detect noisy code-comment pairs and generate synthetic comments, enabling it to determine comments that do not match their associated code snippets and correct them.
+Its effectiveness is demonstrated on the Just-In-Time dataset compared with other state-of-the-art methods. 
 
 <p align="center">
   <img src="./assets/overview.png" width="800px" alt="overview">
 </p>
 
-## Usage Scenario
+# Installation Guide
 
-### Installation
-Install the dependencies:
+1. (Optional) Creating conda environment
 
 ```bash
-pip -r install requirements.txt
+conda create -n docchecker python=3.8
+conda activate docchecker
 ```
 
-### Inference
+2. Install from [PyPI](https://pypi.org/project/docchecker/):
+```bash
+pip install docchecker
+```
+    
+3. Alternatively, build DocChecker from source:
 
-Since DocChecker is a Python package, users can use it by `inference` function. 
+```bash
+git clone https://github.com/FSoft-AI4Code/DocChecker.git
+cd DocChecker
+pip install -r requirements.txt .
+```
+
+# Getting Started
+## Inferencing pipeline
+
+Getting started with DocChecker is simple and quick with our tool by using ``inference()`` function. 
 
 ```python
 from DocChecker.utils import inference
 ```
+There are a few notable arguments that need to be considered:
+
 Parameters:
 
 - input_file_path (str): the file path that contains source code, if you want to check all the functions in there.
 - raw_code (str): a sequence of source code if `input_file_path` is not given.
-- language (str, required): the programming language. We support 10 popular programming languages such as Java, JavaScript, Python, Ruby, Rust, Golang, C#, C++, C, and PHP.
-- output_file_path (str): if `input_file_path` is given, the results from our tool will be written in `output_file_path`; otherwise, they will be printed on the screen.
+- language (str, required): the programming language that corresponds your raw_code. We support 10 popular programming languages, including Java, JavaScript, Python, Ruby, Rust, Golang, C#, C++, C, and PHP.
+- output_file_path (str): if `output_file_path` is given, the results from our tool will be written in `output_file_path`; otherwise, they will be printed on the screen.
 
 Returns:
 
@@ -61,7 +92,8 @@ Returns:
     - predict: the prediction of DocChecker. It returns “Inconsistent!” for the inconsistent pair and “Consistent!” means the docstring is consistent with the code in a code-text pair
     - recommend_docstring: If a code-text pair is considered as “Inconsistent!”, DocChecker will replace its docstring by giving comprehensive ones; otherwise, it will keep the original version.
 
-#### Example
+Here's an example showing how to load docchecker model and perform inference on inconsistent detection task:
+
 ```python
 from DocChecker.utils import inference
 
@@ -99,15 +131,17 @@ inference(raw_code=code,language='python')
 ]
 ```
 
-## Pre-training 
-### Installation
-Setup environment and install dependencies
+## Pre-training Pipeline
+We also provide our source code for you to re-pretraining DocChecker.
+
+### Installation for Pre-training
+Setup environment and install dependencies for pre-training.
 ```bash
 cd ./DocChecker
 pip -r install requirements.txt
 ```
 
-### Dataset
+### Dataset for Pre-training
 The dataset we used comes from [CodeXGLUE](https://github.com/microsoft/CodeXGLUE/tree/main/Code-Text/code-to-text).
 It can be downloaded by following the command line:
 
@@ -137,7 +171,7 @@ rm -r */final
 cd ..
 ```
 
-To reproduce the pre-trained model, follow below command line:
+To re-pretrain, follow the below command line:
 ```shell
 python -m torch.distributed.run --nproc_per_node=2 run.py \
 	--do_train \
@@ -147,10 +181,10 @@ python -m torch.distributed.run --nproc_per_node=2 run.py \
 	--num_train_epochs 10 
 ```
 
-## Fine-tuning 
+## Fine-tuning Pipeline
 To demonstrate the performance of our approach, we fine-tune DocChecker on the Just-In-Time task. The purpose of this task is to determine whether the comment is semantically out of sync with the corresponding code function.
 
-### Dataset
+### Dataset for Fine-tuning
 
 Download data for the [Just-In-Time](https://github.com/panthap2/deep-jit-inconsistency-detection) task from [here].(https://drive.google.com/drive/folders/1heqEQGZHgO6gZzCjuQD1EyYertN4SAYZ?usp=sharing)
 
@@ -176,7 +210,11 @@ python -m torch.distributed.run --nproc_per_node=2 run.py \
 	--data_folder dataset/just_in_time \ 
 ```
 
-# Reference
+# Playground
+We provide an interface for DocChecker at the [link](http://4.193.50.237:5000/).
+The demostration can be found at [Youtube](https://youtu.be/KFbyaSf2I3c).
+
+# Citing Us
 More details can be found in our [paper](https://arxiv.org/abs/). 
 If you use this code or our package, please consider citing us:
 
@@ -196,4 +234,4 @@ If you have any questions, comments or suggestions, please do not hesitate to co
 - Email: support.ailab@fpt.com
 
 # License
-[MIT License](LICENSE.txt)
+[Apache License Version 2.0](LICENSE.txt)
