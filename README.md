@@ -186,7 +186,7 @@ To demonstrate the performance of our approach, we fine-tune DocChecker on the J
 
 ### Dataset for Fine-tuning
 
-Download data for the [Just-In-Time](https://github.com/panthap2/deep-jit-inconsistency-detection) task from [here].(https://drive.google.com/drive/folders/1heqEQGZHgO6gZzCjuQD1EyYertN4SAYZ?usp=sharing)
+Download data for the [Just-In-Time](https://github.com/panthap2/deep-jit-inconsistency-detection) task from [here](https://drive.google.com/drive/folders/1heqEQGZHgO6gZzCjuQD1EyYertN4SAYZ?usp=sharing).
 
 We also provide fine-tune settings for DocChecker, whose results are reported in the paper.
 
@@ -212,10 +212,10 @@ python -m torch.distributed.run --nproc_per_node=2 run.py \
 
 # Playground
 We provide an interface for DocChecker at the [link](http://4.193.50.237:5000/).
-The demostration can be found at [Youtube](https://youtu.be/KFbyaSf2I3c).
+The demonstration can be found at [Youtube](https://youtu.be/KFbyaSf2I3c).
 
 # Citing Us
-More details can be found in our [paper](https://arxiv.org/abs/). 
+More details can be found in our [paper](https://arxiv.org/abs/2306.06347). 
 If you use this code or our package, please consider citing us:
 
 ```bibtex
