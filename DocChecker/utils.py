@@ -149,11 +149,11 @@ def build_or_load_gen(args):
         encoder = RobertaModel.from_pretrained(args.model_name_or_path,config=config) 
 
         tokenizer.add_tokens(["<REPLACE_OLD>", '<REPLACE_NEW>', "<REPLACE_END>", "<KEEP>","<KEEP_END>", "<INSERT_END>", "<DELETE_END>",
-                                "<INSERT>", "<DELETE>","<INSERT_OLD_KEEP_BEFORE>", "<INSERT_NEW_KEEP_BEFORE>"],special_tokens=True)
+                                "<INSERT>" ,"<DELETE>","<INSERT_OLD_KEEP_BEFORE>", "<INSERT_NEW_KEEP_BEFORE>"],special_tokens=True)
         config.vocab_size = len(tokenizer)
         encoder.resize_token_embeddings(len(tokenizer))
 
-
+        # print(encoder)
         model = Seq2Seq(encoder=encoder,decoder=encoder,config=config,
                     beam_size=args.beam_size,max_length=args.max_target_length,
                     sos_id=tokenizer.convert_tokens_to_ids(["<mask0>"])[0],eos_id=tokenizer.sep_token_id,

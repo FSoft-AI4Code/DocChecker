@@ -2,3 +2,8 @@
 __pycache__
 ./wandb
 ./pretrained_model
+./env
+./preprocess.py
+./tmp.py
+./tmp.json
+./test.ipynb

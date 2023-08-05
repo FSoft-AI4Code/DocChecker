@@ -46,6 +46,37 @@ def read_examples(filename, args, stage='train'):
         return read_examples_justInTime(filename, stage, args, post_hoc=args.post_hoc)
     elif args.task == 'pretrain':
         return read_examples_CSN(filename, stage, args)
+    elif args.task == 'cup':
+        return read_examples_cup(filename, stage, args)
+
+
+def read_examples_cup(root_folder, stage, args):
+    """Read examples from filename."""
+    examples = []
+    filename = root_folder +  stage + '.jsonl'
+    with open(filename, encoding="utf-8") as f:
+        for idx, line in enumerate(f):
+            line = line.strip()
+            js = json.loads(line)
+            if 'idx' not in js:
+                js['idx'] = idx
+            code = js['diff_code_change'].replace('\n', ' ')
+            code = ' '.join(code.strip().split())
+            nl = js['dst_desc'].replace('\n', '')
+            nl = ' '.join(nl.strip().split())
+            # if 'label' in js:
+            #     label = js['label']
+            # else:
+            label = 0
+            examples.append(
+                Example(
+                    idx=idx,
+                    source=code,
+                    target=nl,
+                    label=label
+                )
+            )
+    return examples
 
 
 def read_examples_CSN(root_folder, stage, args):
@@ -116,6 +147,8 @@ def read_examples_infer(root_folder, stage, args):
         filename = root_folder + lan + '/' + stage + '.jsonl'
         with open(filename, encoding="utf-8") as f:
             for idx, line in enumerate(f):
+                # if idx == 100:
+                #     break
                 line = line.strip()
                 js = json.loads(line)
                 raw_examples.append(js)

@@ -44,9 +44,9 @@ def main():
     ## Required parameters  
     parser.add_argument("--model_name_or_path", default='microsoft/unixcoder-base', type=str,
                         help="Path to pre-trained model: e.g. roberta-base" )   
-    parser.add_argument("--output_dir", default='./saved_model/', type=str, 
+    parser.add_argument("--output_dir", default='../saved_model/', type=str, 
                         help="The output directory where the model predictions and checkpoints will be written.")   
-    parser.add_argument("--load_model_dir", default='./saved_model/pretrained_model', type=str, 
+    parser.add_argument("--load_model_dir", default='../saved_model/pretrained_CSN', type=str, 
                         help="The output directory where the pretrained model was saved")   
   
     ## Other parameters
@@ -54,7 +54,7 @@ def main():
                         help="The output directory where the model predictions and checkpoints will be written.")   
 
     parser.add_argument("--task", default='just_in_time', type=str,
-                        choices=['pretrain', 'just_in_time'],)   
+                        choices=['pretrain', 'just_in_time', 'cup'],)   
 
     parser.add_argument("--data_folder", default=None, type=str, required=True,
                         help="The folder that contains dataset")
@@ -124,9 +124,10 @@ def main():
             args.output_dir += 'just_in_time/'
         args.num_train_epochs = 30
     elif args.task == 'pretrain':
-        args.language = [ 'python']
+        args.language = [ 'python', 'go','java','javascript','php','ruby']
         args.output_dir += 'pretrained_CSN/'
-
+    elif args.task == "cup":
+        args.output_dir += 'cup/'
     if args.wandb:
         wandb.init(project="DocCheckerNet", name = args.run_name)
 
@@ -171,7 +172,7 @@ def main():
     else:
         model.to(args.device)
         if args.load_model:
-            checkpoint_prefix = 'checkpoint-best-bleu/pytorch_model.bin'
+            checkpoint_prefix = 'checkpoint-epoch-3/pytorch_model.bin'
             output_dir = os.path.join(args.load_model_dir, checkpoint_prefix)  
             model.load_state_dict(torch.load(output_dir, map_location='cuda:0'))
     model.queue_ptr[0] = 0
@@ -180,6 +181,8 @@ def main():
         if args.task == 'just_in_time':
             train_examples, train_dataloader = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool, stage='train', label=True)
         elif args.task == 'pretrain':
+            train_examples, train_dataloader = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool,stage='train')
+        elif args.task == 'cup':
             train_examples, train_dataloader = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool,stage='train')
         # Prepare optimizer and schedule (linear warmup and decay)
         no_decay = ['bias', 'LayerNorm.weight']
@@ -219,7 +222,7 @@ def main():
                     loss_lm, loss_ita, loss_itm, hits = model(source_ids=source_ids,target_ids=target_ids, labels=label, just_in_time=True)
                     
                     total_acc += hits.sum().data.cpu().numpy()
-                elif args.task == 'pretrain':
+                elif args.task == 'pretrain' or  args.task == 'cup':
                     batch = tuple(t.to(args.device) for t in batch)
                     source_ids,target_ids = batch[0], batch[1]
                    
@@ -265,7 +268,7 @@ def main():
             
                     acc = total_acc/total_num*100
             
-                    if len(losses) // args.gradient_accumulation_steps % 5000 == 0 and args.do_eval and args.task == 'pretrain':
+                    if  (len(losses) // args.gradient_accumulation_steps % 5000 == 0 and args.do_eval and args.task == 'pretrain'):
                         #Eval model with dev dataset                   
                         if 'dev' in dev_dataset:
                             eval_examples, eval_dataloader = dev_dataset['dev']
@@ -343,7 +346,7 @@ def main():
                         
                         
     
-            if args.task == 'pretrain':
+            if args.task == 'pretrain' :
                 output_dir = os.path.join(args.output_dir, 'checkpoint-epoch-{}'.format(epoch))
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
@@ -410,7 +413,79 @@ def main():
                     output_model_file = os.path.join(output_dir, "pytorch_model.bin")
                     torch.save(model_to_save.state_dict(), output_model_file)
                     patience = 0 
-            
+            elif args.task == "cup":
+                if 'dev' in dev_dataset:
+                    eval_examples, eval_dataloader = dev_dataset['dev']
+                else:
+                    eval_examples, eval_dataloader = get_dataloader(args, args.data_folder, pool=pool,tokenizer=tokenizer, stage='valid', label=False, sequential=True, num_sample=1000)
+                    dev_dataset['dev']= eval_examples, eval_dataloader
+
+                logger.info("\n***** Running evaluation *****")
+                logger.info("  Num examples = %d", len(eval_examples))
+                logger.info("  Batch size = %d", args.eval_batch_size)
+                losses_eval = []
+
+                model.eval() 
+                p=[]
+                # pred_ids = []
+                for batch in eval_dataloader:
+                    batch = tuple(t.to(args.device) for t in batch)
+                    source_ids = batch[0]                  
+                    target_ids = batch[1]
+                    with torch.no_grad():
+                        loss_lm, loss_ita,loss_itm, pred_sentence = model(source_ids=source_ids,target_ids=target_ids, stage='dev') 
+                        for pred in pred_sentence:
+                            t = pred[0].cpu().numpy()
+                            t = list(t)
+                            if 0 in t:
+                                t = t[:t.index(0)]
+                            text = tokenizer.decode(t,clean_up_tokenization_spaces=False)
+                            p.append(text)
+
+                        loss = args.alpha*loss_lm + args.beta*loss_ita + (1-args.alpha-args.beta)*loss_itm         
+                        losses_eval.append(loss.item())
+                        
+                model.train()
+                predictions = []
+                with open(args.output_dir+"/dev.output",'w') as f, open(args.output_dir+"/dev.gold",'w') as f1:
+                    for ref,gold in zip(p,eval_examples):
+                        predictions.append(str(gold.idx)+'\t'+ref)
+                        f.write(str(gold.idx)+'\t'+ref+'\n')
+                        f1.write(str(gold.idx)+'\t'+gold.target+'\n')     
+
+                (goldMap, predictionMap) = bleu.computeMaps(predictions, os.path.join(args.output_dir, "dev.gold")) 
+                dev_bleu=round(bleu.bleuFromMaps(goldMap, predictionMap)[0],2)
+                logger.info("  %s = %s "%("bleu-4",str(dev_bleu)))
+                logger.info("  "+"*"*20)    
+                if dev_bleu > best_bleu:
+                    logger.info("  Best bleu:%s",dev_bleu)
+                    logger.info("  "+"*"*20)
+                    best_bleu = dev_bleu
+                    # Save best checkpoint for best bleu
+                    output_dir = os.path.join(args.output_dir, 'checkpoint-best-bleu')
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+                    model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
+                    output_model_file = os.path.join(output_dir, "pytorch_model.bin")
+                    torch.save(model_to_save.state_dict(), output_model_file)
+                    patience =0
+                else:
+                    patience +=1
+                    if patience == 5:
+                        break
+
+                if np.mean(losses_eval) < best_loss:
+                    logger.info("  Best loss:%s", np.mean(losses_eval))
+                    logger.info("  "+"*"*20)
+                    best_loss = np.mean(losses_eval)
+                    # Save best checkpoint for best bleu
+                    output_dir = os.path.join(args.output_dir, 'checkpoint-best-loss')
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+                    model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
+                    output_model_file = os.path.join(output_dir, "pytorch_model.bin")
+                    torch.save(model_to_save.state_dict(), output_model_file)
+                    patience =0
 
             if args.task == 'just_in_time' and args.do_test:
                 if 'test' in dev_dataset:
@@ -453,11 +528,14 @@ def main():
             eval_examples, eval_dataloader = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool,stage='test', label=True, sequential=True)
         else:
             checkpoint_prefix = 'checkpoint-best-bleu/pytorch_model.bin'
-            eval_examples, eval_dataloader, raw_examples = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool,stage='train', label=False, sequential=True, infer=True)
+            eval_examples, eval_dataloader, raw_examples = get_dataloader(args, args.data_folder, tokenizer=tokenizer, pool=pool,stage='test', label=False, sequential=True, infer=True)
 
-        output_dir = os.path.join(args.output_dir, checkpoint_prefix)  
-        model_to_load = model.module if hasattr(model, 'module') else model  
-        model_to_load.load_state_dict(torch.load(output_dir,map_location='cuda:0')  )  
+        # output_dir = os.path.join(args.load_model_dir, checkpoint_prefix)  
+        # model.load_state_dict(torch.load(output_dir,map_location='cuda:0'))
+
+        # output_dir = os.path.join(args.output_dir, checkpoint_prefix)  
+        # model_to_load = model.module if hasattr(model, 'module') else model  
+        # model.load_state_dict(torch.load(output_dir,map_location='cuda:0'))
         model.eval()
 
         logger.info("\n***** Running evaluation on the test set *****")
@@ -493,7 +571,7 @@ def main():
             with open(args.output_dir+"/test.output",'w') as f:                
                 for label,target,gold in zip(pred_labels,target_labels,eval_examples):
                     f.write(str(gold.idx)+'\t'+str(label)+'\t'+str(target)+'\n')                        
-        elif args.task == "pretrain":
+        elif args.task == "pretrain" or args.task=="cup":
             p = []    
             labels=[]
             for batch in tqdm(eval_dataloader,total=len(eval_dataloader)):
@@ -518,14 +596,17 @@ def main():
             predictions=[]
             with open(args.output_dir+"/test.output",'w') as f, open(args.output_dir+"/test.gold",'w') as f1:
                 # test original
-                
                 for ref,label,gold in zip(p,labels,eval_examples):
-                        predictions.append(str(gold.idx)+'\t'+str(label)+'\t'+ref)
-                        f.write(str(gold.idx)+'\t'+str(label)+'\t'+ref+'\n')
-                        f1.write(str(gold.idx)+'\t'+str(label)+'\t'+gold.target+'\n')   
- 
+                        predictions.append(str(gold.idx)+'\t'+ref)
+                        f.write(str(gold.idx)+'\t'+ref+'\n')
+                        f1.write(str(gold.idx)+'\t'+gold.target+'\n')   
+
+            (goldMap, predictionMap) = bleu.computeMaps(predictions, os.path.join(args.output_dir, "test.gold")) 
+            dev_bleu=round(bleu.bleuFromMaps(goldMap, predictionMap)[0],2)
+            logger.info("  %s = %s "%("bleu-4",str(dev_bleu)))
+            logger.info("  "+"*"*20)    
+            print(dev_bleu)
 
 if __name__ == "__main__":
     main()
-   
 
