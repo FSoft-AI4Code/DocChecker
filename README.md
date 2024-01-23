@@ -221,10 +221,10 @@ If you use this code or our package, please consider citing us:
 ```bibtex
 @article{DocChecker,
   title={Bootstrapping Code-Text Pretrained Language Model to Detect Inconsistency Between Code and Comment},
-  author={},
-  journal={},
+  author={Anh T. V. Dau, Jin L.C. Guo, Nghi D. Q. Bui},
+  journal={EACL 2024 - Demonstration track},
   pages={},
-  year={2023}
+  year={2024}
 }
 ```
 
